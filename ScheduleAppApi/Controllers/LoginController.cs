@@ -12,17 +12,14 @@ namespace ScheduleAppApi.Controllers
     public class LoginController : ControllerBase
     {
         private readonly IJwtService _jwtService;
-        private readonly IPasswordService _passwordService;
         private readonly IUserRepository _userRepo;
         private readonly IAdapter _adapter;
         public LoginController(
             IJwtService jwtService, 
-            IPasswordService passwordService,
             IUserRepository userRepo,
             IAdapter adapter)
         {
             _jwtService = jwtService;
-            _passwordService = passwordService;
             _userRepo = userRepo;
             _adapter = adapter;
         }
@@ -38,11 +35,9 @@ namespace ScheduleAppApi.Controllers
             if (!result.Key)
                 return Unauthorized();
 
-            var response = _adapter.Bind(result.Value);
+            var token = _jwtService.GetJwtToken(result.Value.Id, result.Value.Role.ToString());
 
-            var token = _jwtService.GetJwtToken(result.Value.Id, response.Role);
-
-            response.Token = token;
+            var response = _adapter.Bind(result.Value, token);
 
             return Ok(response);
         }
