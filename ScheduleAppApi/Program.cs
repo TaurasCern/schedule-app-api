@@ -27,6 +27,7 @@ namespace ScheduleAppApi
             });
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IScheduledTimeRepository, ScheduledTimeRepository>();
 
             builder.Services.AddScoped<IAdapter, Adapter>();
             builder.Services.AddScoped<IJwtService, JwtService>();
@@ -114,6 +115,8 @@ namespace ScheduleAppApi
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors("_allowAny");
 
             app.UseHttpsRedirection();
 
