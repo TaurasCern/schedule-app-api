@@ -56,5 +56,61 @@ namespace ScheduleAppApi.Controllers
 
             return Ok(response);
         }
+        [HttpDelete("{noteId:int}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(int noteId)
+        {
+            if (!int.TryParse(_contextAccessor.HttpContext.User.Identity.Name, out int userId))
+            {
+                return BadRequest();
+            }
+
+            var schTime = await _schTimeRepo.GetAsync(st => st.Id == noteId);
+
+            if (schTime == null)
+            {
+                return NotFound();
+            }
+
+            if (schTime.UserId != userId)
+            {
+                return Unauthorized();
+            }
+
+            await _schTimeRepo.RemoveAsync(schTime);
+
+            return Ok();
+        }
+        [HttpPut("{noteId:int}")]
+        [Authorize]
+        public async Task<IActionResult> Put(int noteId, ScheduledTimeRequest request)
+        {
+            if (!int.TryParse(_contextAccessor.HttpContext.User.Identity.Name, out int userId))
+            {
+                return BadRequest();
+            }
+
+            var schTime = await _schTimeRepo.GetAsync(st => st.Id == noteId);
+
+            if(schTime == null)
+            {
+                return NotFound();
+            }
+
+            if (schTime.UserId != userId)
+            {
+                return Unauthorized();
+            }
+
+            schTime.From = request.From;
+            schTime.To = request.To;
+            schTime.Note = request.Note;
+
+            var updated = await _schTimeRepo.UpdateAsync(schTime);
+
+            var response = _adapter.Bind(updated);
+
+            return Ok(response);
+        }
     }
 }
